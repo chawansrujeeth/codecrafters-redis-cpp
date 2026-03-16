@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   while(true){
     size_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
     if (bytes_received <=0 ){
-      breeak;
+      break;
     }
     cout << "Client connected\n";
     send(client_fd, response, strlen(response), 0);
