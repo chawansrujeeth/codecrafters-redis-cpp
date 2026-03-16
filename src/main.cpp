@@ -8,15 +8,31 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <thread>
+#include <vector>
 
 using namespace std;
 
 
+bool echo_checker( char b[]){
+  vector<char> v1 = {"e","c","h","o"};
+  vector<char> v2 = {"E","C","H","O"};
+  for(int i=0;i<4;i++){
+    if(b[i] != v1[i] && b[i] != v2[i]){
+      return false;
+    }
+  }
+  return true;
+}
+
 void handle_client(int client_fd){
   const char *response = "+PONG\r\n";
+  const char *response = "$3\r\nhey\r\n";
   char buffer[1024];
   while(true){
     size_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
+    if(echo_checker(buffer) == false){
+      break;
+    }
 
     if (bytes_received <=0 ){
       break;
@@ -78,7 +94,7 @@ int main(int argc, char **argv) {
     thread client_thread(handle_client,client_fd);
     client_thread.detach();
   }
-  
+
   close(server_fd);
 
   return 0;
