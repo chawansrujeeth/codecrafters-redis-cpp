@@ -17,7 +17,7 @@ bool echo_checker( char b[]){
 
   vector<string> strs;
   // we need to have all the messages from the buffer like echo, ping , based on each structure
-  for(int i=0;i<b.size();i++){
+  for(int i=0;i<strlen(b);i++){
     if(b[i] == 'e' || b[i] == 'E'){
       strs.push_back("echo");
       return true;
@@ -35,7 +35,10 @@ bool echo_checker( char b[]){
   //     return false;
   //   }
   // }
+
+
   return false;
+
 }
 
 
