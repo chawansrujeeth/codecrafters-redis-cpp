@@ -14,15 +14,31 @@ using namespace std;
 
 
 bool echo_checker( char b[]){
-  vector<char> v1 = {'e','c','h','o'};
-  vector<char> v2 = {'E','C','H','O'};
-  for(int i=0;i<4;i++){
-    if(b[i] != v1[i] && b[i] != v2[i]){
-      return false;
+
+  vector<string> strs;
+  // we need to have all the messages from the buffer like echo, ping , based on each structure
+  for(int i=0;i<b.size();i++){
+    if(b[i] == 'e' || b[i] == 'E'){
+      strs.push_back("echo");
+      return true;
+    }
+    else if(b[i] == 'p' || b[i] == 'P'){
+      strs.push_back("ping");
     }
   }
-  return true;
+
+  
+  // vector<char> v1 = {'e','c','h','o'};
+  // vector<char> v2 = {'E','C','H','O'};
+  // for(int i=0;i<4;i++){
+  //   if(b[i] != v1[i] && b[i] != v2[i]){
+  //     return false;
+  //   }
+  // }
+  return false;
 }
+
+
 
 void handle_client(int client_fd){
   // const char *response = "+PONG\r\n";
