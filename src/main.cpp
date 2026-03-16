@@ -7,8 +7,25 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <thread>
 
 using namespace std;
+
+
+void handle_client(int client_fd){
+  const char *response = "+PONG\r\n";
+  char buffer[1024];
+  while(true){
+    size_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
+
+    if (bytes_received <=0 ){
+      break;
+    }
+    send(client_fd, response, strlen(response), 0);
+  }
+  close(client_fd);
+}
+
 
 int main(int argc, char **argv) {
   // Flush after every cout / cerr
@@ -39,13 +56,13 @@ int main(int argc, char **argv) {
     return 1;
   }
   int connection_backlog = 5;
+
+  if (listen(server_fd, connection_backlog) != 0) {
+    cerr << "listen failed\n";
+    return 1;
+  }
+
   while(true){
-    
-    if (listen(server_fd, connection_backlog) != 0) {
-      cerr << "listen failed\n";
-      return 1;
-    }
-    
     struct sockaddr_in client_addr;
     int client_addr_len = sizeof(client_addr);
     cout << "Waiting for a client to connect...\n";
@@ -55,19 +72,13 @@ int main(int argc, char **argv) {
 
     // Uncomment the code below to pass the first stage
     int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
-    const char *response = "+PONG\r\n";
-    char buffer[1024];
-    while(true){
-      size_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
-      if (bytes_received <=0 ){
-        break;
-      }
-      cout << "Client connected\n";
-      send(client_fd, response, strlen(response), 0);
-    }
-    close(client_fd);
-  }
+    
 
+    cout << "Client connected\n";
+    thread client_thread(handle_client,client_fd);
+    client_thread.detach();
+  }
+  
   close(server_fd);
 
   return 0;
