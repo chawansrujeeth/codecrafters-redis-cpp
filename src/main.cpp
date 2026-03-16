@@ -8,14 +8,14 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <thread>
-#include <vector>
+// #include <vector>
 
 using namespace std;
 
 
 bool echo_checker( char b[]){
-  vector<char> v1 = {"e","c","h","o"};
-  vector<char> v2 = {"E","C","H","O"};
+  char v1[] = {"e","c","h","o"};
+  char v2[] = {"E","C","H","O"};
   for(int i=0;i<4;i++){
     if(b[i] != v1[i] && b[i] != v2[i]){
       return false;
