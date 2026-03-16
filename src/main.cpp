@@ -8,14 +8,14 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <thread>
-// #include <vector>
+#include <vector>
 
 using namespace std;
 
 
 bool echo_checker( char b[]){
-  char v1[] = {"e","c","h","o"};
-  char v2[] = {"E","C","H","O"};
+  vector<char> v1 = {'e','c','h','o'};
+  vector<char> v2 = {'E','C','H','O'};
   for(int i=0;i<4;i++){
     if(b[i] != v1[i] && b[i] != v2[i]){
       return false;
@@ -25,7 +25,7 @@ bool echo_checker( char b[]){
 }
 
 void handle_client(int client_fd){
-  const char *response = "+PONG\r\n";
+  // const char *response = "+PONG\r\n";
   const char *response = "$3\r\nhey\r\n";
   char buffer[1024];
   while(true){
