@@ -15,6 +15,7 @@ using namespace std;
 
 
 map<string, string> kv_store;
+map<string, int> kv_store_timer;
 
 vector<string> echo_checker( const char *buffer, size_t bytes_received){
   vector<string> strs;
@@ -54,6 +55,14 @@ vector<string> echo_checker( const char *buffer, size_t bytes_received){
 }
 
 
+void handle_timer(string keyy){
+  // Sleep for the specified duration
+  this_thread::sleep_for(chrono::seconds(kv_store_timer[keyy]));
+  // Remove the key from the store
+  kv_store.erase(keyy);
+  kv_store_timer.erase(keyy);
+}
+
 
 
 void handle_client(int client_fd){
@@ -88,11 +97,29 @@ void handle_client(int client_fd){
           kv_store[args[1]] = args[2];
           const char *response = "+OK\r\n";
           send(client_fd, response, strlen(response), 0);
+        }else if(args.size() == 5){
+          kv_store[args[1]] = args[2];
+          int timer = 0;
+          if(args[3] == EX ){
+            timer = stoi(args[4]);
+          }else if(args[3] == PX){
+            timer = stoi(args[4]) * 60;
+          }
+          kv_store_timer[args[1]] = timer;
+          thread client_thread(handle_timer,args[1]);
+          client_thread.detach();
+          const char *response = "+OK\r\n";
+          send(client_fd, response, strlen(response), 0);
         }
       }else if(command == "GET" ){
         string arg = args[1];
-        string response =
+        string response;
+        if(kv_store.count(arg)){
+          response =
             "$" + to_string(kv_store[arg].length()) + "\r\n" + kv_store[arg] + "\r\n";
+        }else{
+          response = "$-1\r\n";
+        }
         send(client_fd, response.c_str(), response.length(), 0);
       }
     }
