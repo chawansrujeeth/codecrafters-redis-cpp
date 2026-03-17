@@ -100,9 +100,9 @@ void handle_client(int client_fd){
         }else if(args.size() == 5){
           kv_store[args[1]] = args[2];
           int timer = 0;
-          if(args[3] == EX ){
+          if(args[3] == "EX" ){
             timer = stoi(args[4]);
-          }else if(args[3] == PX){
+          }else if(args[3] == "PX"){
             timer = stoi(args[4]) * 60;
           }
           kv_store_timer[args[1]] = timer;
