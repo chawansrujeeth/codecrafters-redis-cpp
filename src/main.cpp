@@ -57,7 +57,7 @@ vector<string> echo_checker( const char *buffer, size_t bytes_received){
 
 void handle_timer(string keyy){
   // Sleep for the specified duration
-  this_thread::sleep_for(chrono::seconds(kv_store_timer[keyy]));
+  this_thread::sleep_for(chrono::milliseconds(int(kv_store_timer[keyy] * 1000)));
   // Remove the key from the store
   kv_store.erase(keyy);
   kv_store_timer.erase(keyy);
