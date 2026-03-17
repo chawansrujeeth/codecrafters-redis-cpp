@@ -92,7 +92,7 @@ void handle_client(int client_fd){
       }else if(command == "GET" ){
         string arg = args[1];
         string response =
-            "$" + to_string(arg.length()) + "\r\n" + kv_store[arg] + "\r\n";
+            "$" + to_string(kv_store[arg].length()) + "\r\n" + kv_store[arg] + "\r\n";
         send(client_fd, response.c_str(), response.length(), 0);
       }
     }
