@@ -13,106 +13,86 @@
 using namespace std;
 
 
-bool echo_checker( char b[]){
+map<string, string> kv_store;
 
+vector<string> echo_checker( const char *buffer, size_t bytes_received){
   vector<string> strs;
   // we need to have all the messages from the buffer like echo, ping , based on each structure
   // based on resp format we need to add the strings in strs not based on char
   // Resp form is in this form \*2\*echo\*ping\*....
 
-  for(int i=0;i<strlen(b);i++){
-    int count_total = 0;
-    if(b[i] == '*'){
-      count_total = atoi(&b[i+1]);
-      int j =i+5;
-      if(count_total == -1){
+  string buffer_str(buffer, bytes_received);
+  // Parse RESP array
+  if (buffer_str[0] == '*') {
+    size_t crlf_pos = buffer_str.find("\r\n");
+    if (crlf_pos == string::npos)
+      break;
+    // Get number of elements
+    int num_elements = stoi(buffer_str.substr(1, crlf_pos - 1));
+    size_t pos = crlf_pos + 2;
+    vector<string> args;
+    for (int i = 0; i < num_elements; i++) {
+      if (pos >= buffer_str.length())
         break;
-      }
-      int count = 0;
-      string temp = "";
-      while(j<strlen(b)){
-        if (b[j] != '\r' and b[j+1] == '\n'){ // this also has $ also 
-          count++;
-          j+=2;
-          strs.push_back(temp);
-          temp ="";
-        }else{
-          temp+=b[j];
+      // Check for bulk string marker
+      if (buffer_str[pos] == '$') {
+        size_t next_crlf = buffer_str.find("\r\n", pos);
+        if (next_crlf == string::npos)
+          break;
+        int str_len = stoi(buffer_str.substr(pos + 1, next_crlf - pos - 1));
+        pos = next_crlf + 2;
+        if (pos + str_len <= buffer_str.length()) {
+          args.push_back(buffer_str.substr(pos, str_len));
+          pos += str_len + 2; // Skip the string and \r\n
         }
-        j++;
       }
     }
-
-  }
-
-  
-  // vector<char> v1 = {'e','c','h','o'};
-  // vector<char> v2 = {'E','C','H','O'};
-  // for(int i=0;i<4;i++){
-  //   if(b[i] != v1[i] && b[i] != v2[i]){
-  //     return false;
-  //   }
-  // }
-
-
-  return false;
-
+    return args;
+  }  
+  return strs;
 }
 
 
 
+
 void handle_client(int client_fd){
-  // const char *response = "+PONG\r\n";
-  // const char *response = "$3\r\nhey\r\n";
+  // Initialize buffer
   char buffer[1024];
   while(true){
     size_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
-    // if(echo_checker(buffer) == false){
-    //   break;
-    // }
+
+    vector<string> args = echo_checker(buffer,bytes_received);
+    if(args.size() == 0) {
+      break;
+    }
 
     if (bytes_received <=0 ){
       break;
     }
-        string buffer_str(buffer, bytes_received);
-    // Parse RESP array
-    if (buffer_str[0] == '*') {
-      size_t crlf_pos = buffer_str.find("\r\n");
-      if (crlf_pos == string::npos)
-        break;
-      // Get number of elements
-      int num_elements = stoi(buffer_str.substr(1, crlf_pos - 1));
-      size_t pos = crlf_pos + 2;
-      vector<string> args;
-      for (int i = 0; i < num_elements; i++) {
-        if (pos >= buffer_str.length())
-          break;
-        // Check for bulk string marker
-        if (buffer_str[pos] == '$') {
-          size_t next_crlf = buffer_str.find("\r\n", pos);
-          if (next_crlf == string::npos)
-            break;
-          int str_len = stoi(buffer_str.substr(pos + 1, next_crlf - pos - 1));
-          pos = next_crlf + 2;
-          if (pos + str_len <= buffer_str.length()) {
-            args.push_back(buffer_str.substr(pos, str_len));
-            pos += str_len + 2; // Skip the string and \r\n
-          }
-        }
-      }
-      if (!args.empty()) {
-        string command = args[0];
-        for (char &c : command)
-          c = toupper(c);
-        if (command == "PING") {
-          const char *response = "+PONG\r\n";
+
+    if (!args.empty()) {
+      string command = args[0];
+      for (char &c : command)
+        c = toupper(c);
+      if (command == "PING") {
+        const char *response = "+PONG\r\n";
+        send(client_fd, response, strlen(response), 0);
+      } else if (command == "ECHO" && args.size() > 1) {
+        string arg = args[1];
+        string response =
+            "$" + to_string(arg.length()) + "\r\n" + arg + "\r\n";
+        send(client_fd, response.c_str(), response.length(), 0);
+      }else if(command == "SET" ){
+        if(args.size() == 3){
+          kv_store[args[1]] = args[2];
+          const char *response = "+OK\r\n";
           send(client_fd, response, strlen(response), 0);
-        } else if (command == "ECHO" && args.size() > 1) {
-          string arg = args[1];
-          string response =
-              "$" + to_string(arg.length()) + "\r\n" + arg + "\r\n";
-          send(client_fd, response.c_str(), response.length(), 0);
         }
+      }else if(command == "GET" ){
+        string arg = args[1];
+        string response =
+            "$" + to_string(arg.length()) + "\r\n" + kv_store[arg] + "\r\n";
+        send(client_fd, response.c_str(), response.length(), 0);
       }
     }
   }
