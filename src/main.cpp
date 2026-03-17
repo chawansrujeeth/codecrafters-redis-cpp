@@ -15,7 +15,7 @@ using namespace std;
 
 
 map<string, string> kv_store;
-map<string, int> kv_store_timer;
+map<string, double> kv_store_timer;
 
 vector<string> echo_checker( const char *buffer, size_t bytes_received){
   vector<string> strs;
@@ -99,11 +99,11 @@ void handle_client(int client_fd){
           send(client_fd, response, strlen(response), 0);
         }else if(args.size() == 5){
           kv_store[args[1]] = args[2];
-          int timer = 0;
+          double timer = 0;
           if(args[3] == "EX" ){
             timer = stoi(args[4]);
           }else if(args[3] == "PX"){
-            timer = stoi(args[4]) * 60;
+            timer = stoi(args[4]) / 1000.0;
           }
           kv_store_timer[args[1]] = timer;
           thread client_thread(handle_timer,args[1]);
