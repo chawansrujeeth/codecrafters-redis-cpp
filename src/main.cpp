@@ -27,7 +27,7 @@ vector<string> echo_checker( const char *buffer, size_t bytes_received){
   if (buffer_str[0] == '*') {
     size_t crlf_pos = buffer_str.find("\r\n");
     if (crlf_pos == string::npos)
-      // break;
+      return strs;
     // Get number of elements
     int num_elements = stoi(buffer_str.substr(1, crlf_pos - 1));
     size_t pos = crlf_pos + 2;
