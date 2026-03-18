@@ -16,6 +16,7 @@ using namespace std;
 
 map<string, string> kv_store;
 map<string, double> kv_store_timer;
+vector<string> list_store;
 
 vector<string> echo_checker( const char *buffer, size_t bytes_received){
   vector<string> strs;
@@ -24,16 +25,14 @@ vector<string> echo_checker( const char *buffer, size_t bytes_received){
   // Resp form is in this form \*2\*echo\*ping\*....
 
   string buffer_str(buffer, bytes_received);
-  // Parse RESP array
   if (buffer_str[0] == '*') {
-    size_t crlf_pos = buffer_str.find("\r\n");
-    if (crlf_pos == string::npos)
+    size_t c_pos = buffer_str.find("\r\n");
+    if (c_pos == string::npos)
       return strs;
-    // Get number of elements
-    int num_elements = stoi(buffer_str.substr(1, crlf_pos - 1));
-    size_t pos = crlf_pos + 2;
+    int n_elements = stoi(buffer_str.substr(1, c_pos - 1));
+    size_t pos = c_pos + 2;
     vector<string> args;
-    for (int i = 0; i < num_elements; i++) {
+    for (int i = 0; i < n_elements; i++) {
       if (pos >= buffer_str.length())
         break;
       // Check for bulk string marker
@@ -45,7 +44,7 @@ vector<string> echo_checker( const char *buffer, size_t bytes_received){
         pos = next_crlf + 2;
         if (pos + str_len <= buffer_str.length()) {
           args.push_back(buffer_str.substr(pos, str_len));
-          pos += str_len + 2; // Skip the string and \r\n
+          pos += str_len + 2; 
         }
       }
     }
@@ -121,6 +120,12 @@ void handle_client(int client_fd){
           response = "$-1\r\n";
         }
         send(client_fd, response.c_str(), response.length(), 0);
+      }else if(command == "RPUSH"){
+        string arg = args[2];
+        list_store.push_back(arg);
+
+        string response = ":" + to_string(list_store.size()) + "\r\n";
+        send(client_fd,response.c_str(),response.size());
       }
     }
   }
