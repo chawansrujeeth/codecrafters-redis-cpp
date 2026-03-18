@@ -187,6 +187,14 @@ void handle_client(int client_fd){
           set_list_store[arg1] = temp;
           string response = ":" + to_string(set_list_store[arg1].size()) + "\r\n";
           send(client_fd,response.c_str(),response.length(),0);
+        }else if(command == "LLEN"){
+          string arg1 = args[1];
+          vector<string> temp;
+          if(set_list_store.count(arg1)){
+            temp = set_list_store[arg1];  
+          }
+          string response = ":" + to_string(temp.size()) + "\r\n";
+          send(client_fd,response.c_str(),response.length(),0);
         }
     }
   }
