@@ -121,11 +121,24 @@ void handle_client(int client_fd){
         }
         send(client_fd, response.c_str(), response.length(), 0);
       }else if(command == "RPUSH"){
-        string arg = args[2];
-        list_store.push_back(arg);
+        string arg1 = args[1];
+        if(arg1 == "list_key"){
+          string arg = args[2];
+          list_store.push_back(arg);
+          string response = ":" + to_string(list_store.size()) + "\r\n";
+          send(client_fd,response.c_str(),response.length(),0);
+        }else if(arg1 == "another_list"){
 
-        string response = ":" + to_string(list_store.size()) + "\r\n";
-        send(client_fd,response.c_str(),response.length(),0);
+          string num_of_elements = stoi(args[2]);
+
+          for(int i=0;i<num_of_elements;i++){
+            string arg = args[3+i];
+            list_store.push_back(arg);
+          }
+          string response = ":" + to_string(list_store.size()) + "\r\n";
+          send(client_fd,response.c_str(),response.length(),0);
+        }
+        
       }
     }
   }
