@@ -24,6 +24,7 @@ string array_to_resp(vector<string> arr){
   if(arr.empty()){
     return "*0\r\n";
   }
+
   string response = "*" + to_string(arr.size()) + "\r\n";
   for(auto s : arr){
     response += "$" + to_string(s.length()) + "\r\n" + s + "\r\n";
@@ -154,7 +155,7 @@ void handle_client(int client_fd){
           }
           int start = stoi(args[2]);  
           int mx = temp.size() - 1;        
-          int end = min(mx,stoi(args[3])); 
+          int end = stoi(args[3]); 
           vector<string> stored ;
           for(int i = start ;i<=end;i++){
             stored.push_back(list_store[i]);
