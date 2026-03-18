@@ -17,6 +17,7 @@ using namespace std;
 map<string, string> kv_store;
 map<string, double> kv_store_timer;
 vector<string> list_store;
+map<string,vector<string>> set_list_store;
 
 
 string array_to_resp(vector<string> arr){
@@ -130,17 +131,25 @@ void handle_client(int client_fd){
         send(client_fd, response.c_str(), response.length(), 0);
       }else if(command == "RPUSH"){
         string arg1 = args[1];
+        vector<string> temp;
+        if(mp.count(arg1)){
+          temp = mp[arg1];
+        }
         int num_of_elements = args.size() - 2;
         for(int i=0;i<num_of_elements;i++){
           string arg = args[2+i];
-          list_store.push_back(arg);
+          temp.push_back(arg);
         }
-        string response = ":" + to_string(list_store.size()) + "\r\n";
+        mp[arg1] = temp;
+        string response = ":" + to_string(mp[arg1].size()) + "\r\n";
         send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "LRANGE"){
-          int num_of_elements = args.size() - 2;
+          vector<string> temp;
+          if(mp.count(arg1)){
+            temp = mp[arg1];
+          }
           int start = stoi(args[2]);  
-          int mx = list_store.size() - 1;        
+          int mx = temp.size() - 1;        
           int end = min(mx,stoi(args[3])); 
           vector<string> stored ;
           for(int i = start ;i<=end;i++){
