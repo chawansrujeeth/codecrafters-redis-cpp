@@ -139,10 +139,11 @@ void handle_client(int client_fd){
         send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "LRANGE"){
           int num_of_elements = args.size() - 2;
-          int start = stoi(args[2]);          
-          int end = min(num_of_elements - 1,stoi(args[3])); 
+          int start = stoi(args[2]);  
+          int mx = list_store.size() - 1;        
+          int end = min(mx,stoi(args[3])); 
           vector<string> stored ;
-          for(int i= start ;i<=end;i++){
+          for(int i = start ;i<=end;i++){
             stored.push_back(list_store[i]);
           }
           string response = array_to_resp(stored);
