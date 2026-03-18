@@ -21,6 +21,9 @@ map<string,vector<string>> set_list_store;
 
 
 string array_to_resp(vector<string> arr){
+  if(arr.empty()){
+    return "*0\r\n";
+  }
   string response = "*" + to_string(arr.size()) + "\r\n";
   for(auto s : arr){
     response += "$" + to_string(s.length()) + "\r\n" + s + "\r\n";
