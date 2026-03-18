@@ -153,9 +153,17 @@ void handle_client(int client_fd){
           if(set_list_store.count(arg1)){
             temp = set_list_store[arg1];
           }
-          int start = stoi(args[2]);  
-          int mx = temp.size() - 1;        
-          int end = min(mx , stoi(args[3])); 
+          int start = stoi(args[2]); 
+          if(start <0){
+            start = max(0,temp.size() + start);
+          } 
+          int mx = temp.size() - 1;     
+
+          int end = stoi(args[3]); 
+          if(end < 0){
+            end = max(0,temp.size() + end);
+          }
+          end = min(end,mx);
           vector<string> stored ;
           for(int i = start ;i<=end;i++){
             stored.push_back(temp[i]);
@@ -163,8 +171,6 @@ void handle_client(int client_fd){
           string response = array_to_resp(stored);
           send(client_fd,response.c_str(),response.length(),0);
         }
-        
-      // }
     }
   }
   close(client_fd);
