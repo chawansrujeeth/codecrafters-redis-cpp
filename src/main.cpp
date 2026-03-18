@@ -155,10 +155,10 @@ void handle_client(int client_fd){
           }
           int start = stoi(args[2]);  
           int mx = temp.size() - 1;        
-          int end = stoi(args[3]); 
+          int end = min(mx , stoi(args[3])); 
           vector<string> stored ;
           for(int i = start ;i<=end;i++){
-            stored.push_back(list_store[i]);
+            stored.push_back(temp[i]);
           }
           string response = array_to_resp(stored);
           send(client_fd,response.c_str(),response.length(),0);
