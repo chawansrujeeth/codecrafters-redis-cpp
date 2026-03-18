@@ -129,7 +129,7 @@ void handle_client(int client_fd){
           send(client_fd,response.c_str(),response.length(),0);
         }else if(arg1 == "another_list"){
 
-          string num_of_elements = stoi(args[2]);
+          int num_of_elements = stoi(args[2]);
 
           for(int i=0;i<num_of_elements;i++){
             string arg = args[3+i];
