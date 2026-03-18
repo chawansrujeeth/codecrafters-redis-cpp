@@ -149,21 +149,25 @@ void handle_client(int client_fd){
         send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "LRANGE"){
           string arg1 = args[1];
+          
           vector<string> temp;
           if(set_list_store.count(arg1)){
             temp = set_list_store[arg1];
           }
+          int mx = temp.size() ; 
           int start = stoi(args[2]); 
           if(start <0){
-            start = max(0,temp.size() + start);
+            start = max(0,mx+ start);
           } 
-          int mx = temp.size() - 1;     
+              
 
           int end = stoi(args[3]); 
           if(end < 0){
-            end = max(0,temp.size() + end);
+            end = max(0,mx + end);
+          }else{
+            end = min(end,mx-1);
           }
-          end = min(end,mx);
+          
           vector<string> stored ;
           for(int i = start ;i<=end;i++){
             stored.push_back(temp[i]);
