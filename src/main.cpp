@@ -144,6 +144,7 @@ void handle_client(int client_fd){
         string response = ":" + to_string(mp[arg1].size()) + "\r\n";
         send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "LRANGE"){
+          string arg1 = args[1];
           vector<string> temp;
           if(mp.count(arg1)){
             temp = mp[arg1];
