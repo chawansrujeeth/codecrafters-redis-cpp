@@ -197,9 +197,11 @@ void handle_client(int client_fd){
           send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "LPOP"){
           string arg1 = args[1];
+          bool count_present = false;
           int ele_to_remove = 1;
           if(args.size() ==3){
             ele_to_remove = stoi(args[2]);
+            count_present = true;
           }
           vector<string> temp;
           if(set_list_store.count(arg1)){
@@ -214,6 +216,13 @@ void handle_client(int client_fd){
           }
           set_list_store[arg1] = temp;
           string response = array_to_resp(value);
+          if(!count_present){
+            if(value.size() > 0){
+              response = "$" + to_string(value[0].length()) + "\r\n" + value[0] + "\r\n";
+            }else{
+              response = "$-1\r\n";
+            }
+          }
           send(client_fd,response.c_str(),response.length(),0);
         }
     }
