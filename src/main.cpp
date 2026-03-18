@@ -179,7 +179,8 @@ void handle_client(int client_fd){
             temp = set_list_store[arg1];  
           }
           int num_of_elements = args.size() - 2;
-          for(int i=num_of_elements-1;i>=0;i--){
+
+          for(int i=0;i<num_of_elements;i++){
             string arg = args[2+i];
             temp.insert(temp.begin(),arg);        
           }
