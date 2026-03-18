@@ -125,7 +125,7 @@ void handle_client(int client_fd){
         list_store.push_back(arg);
 
         string response = ":" + to_string(list_store.size()) + "\r\n";
-        send(client_fd,response.c_str(),response.length());
+        send(client_fd,response.c_str(),response.length(),0);
       }
     }
   }
