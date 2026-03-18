@@ -141,7 +141,7 @@ void handle_client(int client_fd){
           temp.push_back(arg);
         }
         set_list_store[arg1] = temp;
-        string response = ":" + to_string(mset_list_storep[arg1].size()) + "\r\n";
+        string response = ":" + to_string(set_list_store[arg1].size()) + "\r\n";
         send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "LRANGE"){
           string arg1 = args[1];
