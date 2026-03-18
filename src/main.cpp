@@ -18,12 +18,20 @@ map<string, string> kv_store;
 map<string, double> kv_store_timer;
 vector<string> list_store;
 
+
+string array_to_resp(vector<string> arr){
+  string response = "*" + to_string(arr.size()) + "\r\n";
+  for(auto s : arr){
+    response += "$" + to_string(s.length()) + "\r\n" + s + "\r\n";
+  }
+  return response;
+}
+
 vector<string> echo_checker( const char *buffer, size_t bytes_received){
   vector<string> strs;
   // we need to have all the messages from the buffer like echo, ping , based on each structure
   // based on resp format we need to add the strings in strs not based on char
   // Resp form is in this form \*2\*echo\*ping\*....
-
   string buffer_str(buffer, bytes_received);
   if (buffer_str[0] == '*') {
     size_t c_pos = buffer_str.find("\r\n");
@@ -122,18 +130,21 @@ void handle_client(int client_fd){
         send(client_fd, response.c_str(), response.length(), 0);
       }else if(command == "RPUSH"){
         string arg1 = args[1];
-        // if(arg1 == "list_key"){
-        //   string arg = args[2];
-        //   list_store.push_back(arg);
-        //   string response = ":" + to_string(list_store.size()) + "\r\n";
-        //   send(client_fd,response.c_str(),response.length(),0);
-        // }else if(arg1 == "another_list"){
-          int num_of_elements = args.size() - 2;
-          for(int i=0;i<num_of_elements;i++){
-            string arg = args[2+i];
-            list_store.push_back(arg);
+        int num_of_elements = args.size() - 2;
+        for(int i=0;i<num_of_elements;i++){
+          string arg = args[2+i];
+          list_store.push_back(arg);
+        }
+        string response = ":" + to_string(list_store.size()) + "\r\n";
+        send(client_fd,response.c_str(),response.length(),0);
+        }else if(command == "LRANGE"){
+          int start = stoi(args[2]);          
+          int end = stoi(args[3]); 
+          vector<string> stored ;
+          for(int i= start ;i<=end;i++){
+            stored.push_back(list_store[i]);
           }
-          string response = ":" + to_string(list_store.size()) + "\r\n";
+          string response = array_to_resp(stored);
           send(client_fd,response.c_str(),response.length(),0);
         }
         
