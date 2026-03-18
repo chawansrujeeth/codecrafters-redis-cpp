@@ -159,8 +159,6 @@ void handle_client(int client_fd){
           if(start <0){
             start = max(0,mx+ start);
           } 
-              
-
           int end = stoi(args[3]); 
           if(end < 0){
             end = max(0,mx + end);
@@ -173,6 +171,20 @@ void handle_client(int client_fd){
             stored.push_back(temp[i]);
           }
           string response = array_to_resp(stored);
+          send(client_fd,response.c_str(),response.length(),0);
+        }else if(command == "LPUSH"){
+          string arg1 = args[1];
+          vector<string> temp;
+          if(set_list_store.count(arg1)){
+            temp = set_list_store[arg1];  
+          }
+          int num_of_elements = args.size() - 2;
+          for(int i=num_of_elements-1;i>=0;i--){
+            string arg = args[2+i];
+            temp.insert(temp.begin(),arg);        
+          }
+          set_list_store[arg1] = temp;
+          string response = ":" + to_string(set_list_store[arg1].size()) + "\r\n";
           send(client_fd,response.c_str(),response.length(),0);
         }
     }
