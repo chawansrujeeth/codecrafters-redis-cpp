@@ -89,7 +89,7 @@ void blk_variant(int client_fd, string arg,double time){
       auto start = chrono::steady_clock::now();
       while(true){
         auto end = chrono::steady_clock::now();
-        auto duration = chrono::duration_cast<chrono::milliseconds>(int((end - start)*1000));
+        auto duration = chrono::duration_cast<chrono::milliseconds>(((end - start)*1000));
         if(duration.count() > time){
           string response = "*-1\r\n";
           send(client_fd, response.c_str(), response.length(), 0);
