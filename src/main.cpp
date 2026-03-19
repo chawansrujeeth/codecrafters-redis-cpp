@@ -81,6 +81,7 @@ void blk_variant(int client_fd, string arg,double time){
         set_list_store[arg].erase(set_list_store[arg].begin());
         break;
       }
+      this_thread::sleep_for(chrono::milliseconds(1));
     }
   }else{
       // here we need to wait till specific time then we cant pop it 
