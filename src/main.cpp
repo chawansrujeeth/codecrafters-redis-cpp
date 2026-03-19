@@ -121,7 +121,7 @@ void handle_timer(string keyy){
   kv_store_timer.erase(keyy);
 }
 
-void handle_client_xadd(vector<string> args){
+void handle_client_xadd(int client_fd , vector<string> args){
   string arg1 = args[1];
   int num_of_elements = args.size() -3;
   map<string,string> temp;
@@ -306,7 +306,7 @@ void handle_client(int client_fd){
           }
           send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "XADD"){
-          handle_client_xadd(args);
+          handle_client_xadd(client_fd , args);
         }
     }
   }
