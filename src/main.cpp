@@ -89,7 +89,7 @@ void blk_variant(int client_fd, string arg,double time){
       auto start = chrono::steady_clock::now();
       while(true){
         auto end = chrono::steady_clock::now();
-        auto duration = chrono::duration_cast<std::chrono::milliseconds>((end - start));
+        auto duration = chrono::duration_cast<chrono::milliseconds>(int((end - start)*1000));
         if(duration.count() > time){
           string response = "*-1\r\n";
           send(client_fd, response.c_str(), response.length(), 0);
@@ -268,7 +268,7 @@ void handle_client(int client_fd){
           send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "BLPOP"){
           string arg1 = args[1];
-          double time_out = stoi(args[2]) * 1000.0;
+          double time_out = stoi(args[2]) ;
           thread client_thread(blk_variant , client_fd,arg1,time_out);
           client_thread.detach();
         }
