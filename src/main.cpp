@@ -274,6 +274,13 @@ void handle_client(int client_fd){
           double time_out = stod(args[2])  ;
           thread client_thread(blk_variant , client_fd,arg1,time_out);
           client_thread.detach();
+        }else if(command == "TYPE"){
+          string arg1 = args[1];
+          string response = "+none\r\n";
+          if(set_list_store.count(arg1)){
+            response = "+string\r\n";
+          }
+          send(client_fd,response.c_str(),response.length(),0);
         }
     }
   }
