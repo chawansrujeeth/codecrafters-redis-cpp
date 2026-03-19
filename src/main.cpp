@@ -89,7 +89,7 @@ void blk_variant(int client_fd, string arg,double time){
       auto start = chrono::steady_clock::now();
       while(true){
         auto end = chrono::steady_clock::now();
-        auto duration = chrono::duration_cast<std::chrono::milliseconds>((int)(end - start));
+        auto duration = chrono::duration_cast<std::chrono::milliseconds>((end - start));
         if(duration.count > time){
           break;
         }
@@ -102,8 +102,6 @@ void blk_variant(int client_fd, string arg,double time){
           set_list_store[arg].erase(set_list_store[arg].begin());
           break;
         }
-
-        
       }
     }
 }
