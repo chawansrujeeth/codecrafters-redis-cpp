@@ -91,10 +91,8 @@ void blk_variant(int client_fd, string arg,double time){
         auto end = chrono::steady_clock::now();
         auto duration = chrono::duration_cast<std::chrono::milliseconds>((end - start));
         if(duration.count() > time){
-          vector<string> resp_arr;
-          string response = array_to_resp(resp_arr);
+          string response = "*-1\r\n";
           send(client_fd, response.c_str(), response.length(), 0);
-          set_list_store[arg].erase(set_list_store[arg].begin());
           break;
         }
         if(set_list_store.count(arg) && set_list_store[arg].size() > 0){
