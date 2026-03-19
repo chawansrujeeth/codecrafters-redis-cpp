@@ -81,13 +81,13 @@ void blk_variant(int client_fd, string arg,int time){
         set_list_store[arg].erase(set_list_store[arg].begin());
         break;
       }
-    }else{
+    }
+  }else{
       // here we need to wait till specific time then we cant pop it 
       while(true){
         break; // need to think
       }
     }
-  }
 }
 
 
