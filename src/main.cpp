@@ -73,7 +73,7 @@ void blk_variant(int client_fd, string arg,int time){
     // here we wait for infinite time
     while(true){
       if(set_list_store.count(arg) && set_list_store[arg].size() > 0){
-        vector<string> resp_arr();
+        vector<string> resp_arr;
         resp_arr.push_back(arg);
         resp_arr.push_back(set_list_store[arg][0]);
         string response = array_to_resp(resp_arr);
