@@ -137,7 +137,7 @@ void handle_client_xadd(int client_fd , vector<string> args){
   }
   string id_temp  = args[2];
   if(j>id_temp){
-    string response = "-ERR The ID specified in XADD is equal or smaller than the target stream top item" + "\r\n";
+    string response = "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
     send(client_fd, response.c_str(), response.length(), 0);
     return ;
 
