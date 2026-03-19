@@ -18,7 +18,8 @@ map<string, string> kv_store;
 map<string, double> kv_store_timer;
 vector<string> list_store;
 map<string,vector<string>> set_list_store;
-map<string,map<string,string>> stream_list_store;
+// map<string,map<string,string>> stream_list_store;
+map<string,vector<pair<int,int>>> stream_list_store;
 
 
 string array_to_resp(vector<string> arr){
@@ -124,17 +125,29 @@ void handle_timer(string keyy){
 void handle_client_xadd(int client_fd , vector<string> args){
   string arg1 = args[1];
   int num_of_elements = args.size() -3;
-  map<string,string> temp;
+  vector<pair<string,string>> temp;
+  string top ="";
   if(stream_list_store.count(arg1)){
     temp = stream_list_store[arg1];        
+    for(auto j:temp){
+      if(j.first == "id"){
+        top = j.second;
+      }
+    }
   }
   string id_temp  = args[2];
-  temp["id"] = id_temp;
+  if(j>id_temp){
+    string response = "-ERR The ID specified in XADD is equal or smaller than the target stream top item" + "\r\n";
+    send(client_fd, response.c_str(), response.length(), 0);
+    return ;
+
+  }
+  temp.push_back({"id",id_temp});
   for(int i=0;i<num_of_elements;i+=2){
     string key_temp,value_temp;
     key_temp = args[3+i];
     value_temp = args[4+i];
-    temp[key_temp] = value_temp;
+    temp.push_back({key_temp,value_temp});
   }
   stream_list_store[arg1] = temp;
   string response  = "$"+ to_string(id_temp.size())+ "\r\n" + id_temp + "\r\n";
