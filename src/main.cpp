@@ -66,6 +66,30 @@ vector<string> echo_checker( const char *buffer, size_t bytes_received){
   return strs;
 }
 
+// if two clients send at blpop commadn how ever did first will get return then second will not get anything
+
+void blk_variant(int client_fd, string arg,int time){ 
+  if(time == 0){
+    // here we wait for infinite time
+    while(true){
+      if(set_list_store.count(arg) && set_list_store[arg].size() > 0){
+        vector<string> resp_arr();
+        resp_arr.push_back(arg);
+        resp_arr.push_back(set_list_store[arg][0]);
+        string response = array_to_resp(resp_arr);
+        send(client_fd, response.c_str(), response.length(), 0);
+        set_list_store[arg].erase(set_list_store[arg].begin());
+        break;
+      }
+    }else{
+      // here we need to wait till specific time then we cant pop it 
+      while(true){
+        break; // need to think
+      }
+    }
+  }
+}
+
 
 void handle_timer(string keyy){
   // Sleep for the specified duration
@@ -224,6 +248,11 @@ void handle_client(int client_fd){
             }
           }
           send(client_fd,response.c_str(),response.length(),0);
+        }else if(command == "BLPOP"){
+          string arg1 = args[1];
+          int time_out = stoi(args[2]);
+          thread client_thread(blk_variant , client_fd,arg1,time_out);
+          client_thread.detach();
         }
     }
   }
