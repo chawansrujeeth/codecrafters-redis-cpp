@@ -90,7 +90,7 @@ void blk_variant(int client_fd, string arg,double time){
       while(true){
         auto end = chrono::steady_clock::now();
         auto duration = chrono::duration_cast<std::chrono::milliseconds>((end - start));
-        if(duration.count > time){
+        if(duration.count() > time){
           break;
         }
         if(set_list_store.count(arg) && set_list_store[arg].size() > 0){
