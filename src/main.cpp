@@ -270,7 +270,7 @@ void handle_client(int client_fd){
           send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "BLPOP"){
           string arg1 = args[1];
-          double time_out = stoi(args[2])  ;
+          double time_out = stod(args[2])  ;
           thread client_thread(blk_variant , client_fd,arg1,time_out);
           client_thread.detach();
         }
