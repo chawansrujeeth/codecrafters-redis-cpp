@@ -277,7 +277,7 @@ void handle_client(int client_fd){
         }else if(command == "TYPE"){
           string arg1 = args[1];
           string response = "+none\r\n";
-          if(set_list_store.count(arg1)){
+          if(kv_store.count(arg1)){
             response = "+string\r\n";
           }
           send(client_fd,response.c_str(),response.length(),0);
