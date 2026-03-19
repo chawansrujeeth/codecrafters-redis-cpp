@@ -89,8 +89,9 @@ void blk_variant(int client_fd, string arg,double time){
       auto start = chrono::steady_clock::now();
       while(true){
         auto end = chrono::steady_clock::now();
-        auto duration = chrono::duration_cast<chrono::milliseconds>(((end - start)));
-        double tt = duration.count() / 1000.0;
+        // auto duration = chrono::duration_cast<chrono::milliseconds>(((end - start)));
+        // double tt = duration.count() / 1000.0;
+        double tt = chrono::duration<double>(end - start).count();
         if(tt > time){
           string response = "*-1\r\n";
           send(client_fd, response.c_str(), response.length(), 0);
@@ -105,11 +106,10 @@ void blk_variant(int client_fd, string arg,double time){
           set_list_store[arg].erase(set_list_store[arg].begin());
           break;
         }
-        this_thread::sleep_for(chrono::milliseconds(100));
+        this_thread::sleep_for(chrono::milliseconds(1));
       }
     }
 }
-
 
 void handle_timer(string keyy){
   // Sleep for the specified duration
