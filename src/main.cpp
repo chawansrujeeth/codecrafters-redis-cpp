@@ -18,6 +18,7 @@ map<string, string> kv_store;
 map<string, double> kv_store_timer;
 vector<string> list_store;
 map<string,vector<string>> set_list_store;
+map<string,map<string,string>> stream_list_store;
 
 
 string array_to_resp(vector<string> arr){
@@ -118,6 +119,26 @@ void handle_timer(string keyy){
   // Remove the key from the store
   kv_store.erase(keyy);
   kv_store_timer.erase(keyy);
+}
+
+void handle_client_xadd(vector<string> args){
+  string arg1 = args[1];
+  int num_of_elements = args.size() -3;
+  map<string,string> temp;
+  if(stream_list_store.count(arg1)){
+    temp = stream_list_store[arg1];        
+  }
+  string id_temp  = args[2];
+  temp["id"] = id_temp;
+  for(int i=0;i<num_of_elements;i+=2){
+    string key_temp,value_temp;
+    key_temp = args[3+i];
+    value_temp = args[4+i];
+    temp[key_temp] = value_temp;
+  }
+  stream_list_store[arg1] = temp;
+  string response  = "$"+ to_string(id_temp.size())+ "\r\n" + id_temp + "\r\n";
+  send(client_fd, response.c_str(), response.length(), 0);
 }
 
 
@@ -280,7 +301,12 @@ void handle_client(int client_fd){
           if(kv_store.count(arg1)){
             response = "+string\r\n";
           }
+          if(stream_list_store.count(arg1)){
+            response = "+stream\r\n";
+          }
           send(client_fd,response.c_str(),response.length(),0);
+        }else if(command == "XADD"){
+          handle_client_xadd(args);
         }
     }
   }
