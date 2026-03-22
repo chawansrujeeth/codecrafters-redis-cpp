@@ -159,7 +159,7 @@ void handle_client_xadd(int client_fd , vector<string> args){
   }else{
     if(id_temp.find("*") != string::npos){
       auto id_sec = stoi(id_temp.substr(0,id_temp.find("-")));
-      id_seq = 1;
+      int id_seq = 1;
       id_temp = to_string(id_sec) + "-" + to_string(id_seq);
     }
   }
