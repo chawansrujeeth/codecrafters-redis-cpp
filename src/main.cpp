@@ -132,12 +132,16 @@ void handle_client_xadd(int client_fd , vector<string> args){
     temp = stream_list_store[arg1];            
   }
   string id_temp  = args[2];
-  if(temp.size() >= 1){
+  if(id_temp == "0-0"){
+    string response  = "-ERR The ID specified in XADD must be greater than 0-0\r\n";
+      send(client_fd, response.c_str(), response.length(), 0);
+      return ;
+  }
+  else if(temp.size() >= 1){
     top = temp.back().first;
     if(top>id_temp){
       // string response = "-ERR The ID specified in XADD must be greater than " + top+ "\r\n";
       string response  = "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
-      
       send(client_fd, response.c_str(), response.length(), 0);
       return ;
     }
