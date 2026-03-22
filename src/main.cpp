@@ -146,7 +146,6 @@ void handle_client_xadd(int client_fd , vector<string> args){
     // now i need to check if the id_temp contains. * if yes then i need to add 1 to the top and make it the id_temp
     if(id_temp.find("*") != string::npos){
       id_seq = top_seq + 1;
-      id_seq = 0;
       id_temp = to_string(id_sec) + "-" + to_string(id_seq);
     } 
 
