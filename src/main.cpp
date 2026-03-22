@@ -145,7 +145,7 @@ void handle_client_xadd(int client_fd , vector<string> args){
     auto id_seq = stoi(id_temp.substr(id_temp.find("-")+1));
     // now i need to check if the id_temp contains. * if yes then i need to add 1 to the top and make it the id_temp
     if(id_temp.find("*") != string::npos){
-      id_sec = top_sec + 1;
+      id_seq = top_seq + 1;
       id_seq = 0;
       id_temp = to_string(id_sec) + "-" + to_string(id_seq);
     } 
@@ -155,6 +155,12 @@ void handle_client_xadd(int client_fd , vector<string> args){
       string response  = "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
       send(client_fd, response.c_str(), response.length(), 0);
       return ;
+    }
+  }else{
+    if(id_temp.find("*") != string::npos){
+      auto id_sec = stoi(id_temp.substr(0,id_temp.find("-")));
+      id_seq = 1;
+      id_temp = to_string(id_sec) + "-" + to_string(id_seq);
     }
   }
 
