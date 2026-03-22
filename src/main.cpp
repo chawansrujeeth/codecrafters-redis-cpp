@@ -150,8 +150,8 @@ void handle_client_xadd(int client_fd , vector<string> args){
     if(id_temp.find("*") != string::npos){
       id_seq = top_seq + 1;
       int id_sec = 1;
-      if(top_seq == id_seq){
-        id_sec = top_sec + 1;
+      if(top_sec == id_sec){
+        id_seq = top_seq + 1;
       }
       id_temp = to_string(id_sec) + "-" + to_string(id_seq);      
     } 
