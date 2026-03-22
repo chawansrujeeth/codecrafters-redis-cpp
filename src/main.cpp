@@ -139,6 +139,17 @@ void handle_client_xadd(int client_fd , vector<string> args){
   }
   else if(temp.size() >= 1){
     top = temp.back().first;
+    int top_sec = stoi(top.substr(0,top.find("-")));
+    int top_seq = stoi(top.substr(top.find("-")+1));
+    auto id_sec = stoi(id_temp.substr(0,id_temp.find("-")));
+    auto id_seq = stoi(id_temp.substr(id_temp.find("-")+1));
+    // now i need to check if the id_temp contains. * if yes then i need to add 1 to the top and make it the id_temp
+    if(id_temp.find("*") != string::npos){
+      id_sec = top_sec + 1;
+      id_seq = 0;
+      id_temp = to_string(id_sec) + "-" + to_string(id_seq);
+    } 
+
     if(top>=id_temp){
       // string response = "-ERR The ID specified in XADD must be greater than " + top+ "\r\n";
       string response  = "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
