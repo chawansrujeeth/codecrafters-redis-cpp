@@ -145,10 +145,14 @@ void handle_client_xadd(int client_fd , vector<string> args){
     int top_sec = stoi(top.substr(0,top.find("-")));
     int top_seq = stoi(top.substr(top.find("-")+1));
     auto id_sec = stoi(id_temp.substr(0,id_temp.find("-")));
-    auto id_seq = stoi(id_temp.substr(id_temp.find("-")+1));
+    // auto id_seq = stoi(id_temp.substr(id_temp.find("-")+1));
     // now i need to check if the id_temp contains. * if yes then i need to add 1 to the top and make it the id_temp
     if(id_temp.find("*") != string::npos){
       id_seq = top_seq + 1;
+      int id_sec = 1;
+      if(top_seq == id_seq){
+        id_sec = top_sec + 1;
+      }
       id_temp = to_string(id_sec) + "-" + to_string(id_seq);
     } 
 
