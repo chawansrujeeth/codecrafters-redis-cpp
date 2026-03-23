@@ -429,13 +429,15 @@ void handle_client(int client_fd){
         }else if(command == "XRANGE"){
           handle_client_xrange(client_fd , args);
         }else if(command == "XREAD"){
-            string arg1 = args[1];
+            string arg1 = args[3];
             int arg1_sec = stoi(arg1.substr(0,arg1.find("-")));
             arg1_sec++;
             string arg1_sec_str = to_string(arg1_sec);
             string arg2 = "+";
-            args[1] = arg1_sec_str;
+            args[3] = arg1_sec_str;
             args.push_back(arg2);
+            // we need to remove the args[1] which is stream
+            args.erase(args.begin() + 1); 
             handle_client_xrange(client_fd , args);
         }
     }
