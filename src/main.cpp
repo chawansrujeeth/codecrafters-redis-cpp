@@ -123,6 +123,46 @@ void handle_timer(string keyy){
   kv_store_timer.erase(keyy);
 }
 
+string array_to_resp(vector<pair<string,map<string,string>>> arr){
+  if(arr.empty()){
+    return "*0\r\n";
+  }
+
+  string response = "*" + to_string(arr.size()) + "\r\n";
+  for(auto p : arr){
+    string id = p.first;
+    map<string,string> field_value = p.second;
+    response += "*2\r\n$" + to_string(id.length()) + "\r\n" + id + "\r\n";
+    response += "*" + to_string(field_value.size()) + "\r\n";
+    for(auto f_v : field_value){
+      string field = f_v.first;
+      string value = f_v.second;
+      response += "$" + to_string(field.length()) + "\r\n" + field + "\r\n";
+      response += "$" + to_string(value.length()) + "\r\n" + value + "\r\n";
+    }
+  }
+  return response;
+}
+
+void handle_client_xrange(int client_fd , vector<string> args){
+  string arg1 = args[1];
+  string id_start = args[2];
+  string id_end = args[3];
+  vector<pair<string,map<string,string>>> temp;
+  if(stream_list_store.count(arg1)){
+    temp = stream_list_store[arg1];            
+  }
+  vector<pair<string,map<string,string>>> res;
+  for(auto p : temp){
+    string id_temp = p.first;
+    if((id_temp >= id_start || id_start == "-") && (id_temp <= id_end || id_end == "+")){
+      res.push_back(p);
+    }
+  }
+  string response = array_to_resp(res);
+  send(client_fd,response.c_str(),response.length(),0);
+}
+
 void handle_client_xadd(int client_fd , vector<string> args){
   string arg1 = args[1];
   int num_of_elements = args.size() - 3;
@@ -350,6 +390,8 @@ void handle_client(int client_fd){
           send(client_fd,response.c_str(),response.length(),0);
         }else if(command == "XADD"){
           handle_client_xadd(client_fd , args);
+        }else if(command == "XRANGE"){
+          handle_client_xrange(client_fd , args);
         }
     }
   }
