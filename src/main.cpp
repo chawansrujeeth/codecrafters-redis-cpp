@@ -143,24 +143,56 @@ string array_to_resp(vector<pair<string,map<string,string>>> arr){
   }
   return response;
 }
+pair<long long, long long> parse_id(const string &id) {
+    int dash = id.find('-');
+    long long ms = stoll(id.substr(0, dash));
+    long long seq = stoll(id.substr(dash + 1));
+    return {ms, seq};
+}
 
-void handle_client_xrange(int client_fd , vector<string> args){
-  string arg1 = args[1];
-  string id_start = args[2];
-  string id_end = args[3];
-  vector<pair<string,map<string,string>>> temp;
-  if(stream_list_store.count(arg1)){
-    temp = stream_list_store[arg1];            
-  }
-  vector<pair<string,map<string,string>>> res;
-  for(auto p : temp){
-    string id_temp = p.first;
-    if((id_temp >= id_start || id_start == "-") && (id_temp <= id_end || id_end == "+")){
-      res.push_back(p);
+bool id_ge(const string &a, const string &b) {
+    auto [ams, aseq] = parse_id(a);
+    auto [bms, bseq] = parse_id(b);
+    if (ams != bms) return ams > bms;
+    return aseq >= bseq;
+}
+
+bool id_le(const string &a, const string &b) {
+    auto [ams, aseq] = parse_id(a);
+    auto [bms, bseq] = parse_id(b);
+    if (ams != bms) return ams < bms;
+    return aseq <= bseq;
+}
+
+
+void handle_client_xrange(int client_fd, vector<string> args) {
+    string key = args[1];
+    string id_start = args[2];
+    string id_end = args[3];
+
+    vector<pair<string, map<string, string>>> res;
+
+    if (!stream_list_store.count(key)) {
+        string response = "*0\r\n";
+        send(client_fd, response.c_str(), response.length(), 0);
+        return;
     }
-  }
-  string response = array_to_resp(res);
-  send(client_fd,response.c_str(),response.length(),0);
+
+    auto &temp = stream_list_store[key];
+
+    for (auto &p : temp) {
+        string id = p.first;
+
+        bool ok_start = (id_start == "-") || id_ge(id, id_start);
+        bool ok_end   = (id_end == "+") || id_le(id, id_end);
+
+        if (ok_start && ok_end) {
+            res.push_back(p);
+        }
+    }
+
+    string response = array_to_resp(res);
+    send(client_fd, response.c_str(), response.length(), 0);
 }
 
 void handle_client_xadd(int client_fd , vector<string> args){
