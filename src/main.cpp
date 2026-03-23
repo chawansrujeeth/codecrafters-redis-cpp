@@ -123,26 +123,30 @@ void handle_timer(string keyy){
   kv_store_timer.erase(keyy);
 }
 
-string array_to_resp(vector<pair<string,map<string,string>>> arr){
-  if(arr.empty()){
-    return "*0\r\n";
-  }
-
-  string response = "*" + to_string(arr.size()) + "\r\n";
-  for(auto p : arr){
-    string id = p.first;
-    map<string,string> field_value = p.second;
-    response += "*2\r\n$" + to_string(id.length()) + "\r\n" + id + "\r\n";
-    response += "*" + to_string(field_value.size()) + "\r\n";
-    for(auto f_v : field_value){
-      string field = f_v.first;
-      string value = f_v.second;
-      response += "$" + to_string(field.length()) + "\r\n" + field + "\r\n";
-      response += "$" + to_string(value.length()) + "\r\n" + value + "\r\n";
+string array_to_resp(vector<pair<string, map<string, string>>> &arr) {
+    if (arr.empty()) {
+        return "*0\r\n";
     }
-  }
-  return response;
+
+    string response = "*" + to_string(arr.size()) + "\r\n";
+    for (auto &p : arr) {
+        const string &id = p.first;
+        const map<string, string> &field_value = p.second;
+        response += "*2\r\n";
+        response += "$" + to_string(id.length()) + "\r\n" + id + "\r\n";
+        response += "*" + to_string(2 * field_value.size()) + "\r\n";
+
+        for (auto &f_v : field_value) {
+            const string &field = f_v.first;
+            const string &value = f_v.second;
+
+            response += "$" + to_string(field.length()) + "\r\n" + field + "\r\n";
+            response += "$" + to_string(value.length()) + "\r\n" + value + "\r\n";
+        }
+    }
+    return response;
 }
+
 pair<long long, long long> parse_id(const string &id) {
     int dash = id.find('-');
     long long ms = stoll(id.substr(0, dash));
