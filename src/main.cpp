@@ -428,6 +428,15 @@ void handle_client(int client_fd){
           handle_client_xadd(client_fd , args);
         }else if(command == "XRANGE"){
           handle_client_xrange(client_fd , args);
+        }else if(command == "XREAD"){
+            string arg1 = args[1];
+            int arg1_sec = stoi(arg1.substr(0,arg1.find("-")));
+            arg1_sec++;
+            string arg1_sec_str = to_string(arg1_sec);
+            string arg2 = "+";
+            args[1] = arg1_sec_str;
+            args.push_back(arg2);
+            handle_client_xrange(client_fd , args);
         }
     }
   }
