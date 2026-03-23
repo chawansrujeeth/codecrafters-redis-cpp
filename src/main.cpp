@@ -180,7 +180,7 @@ void handle_client_xread(int client_fd, vector<string> args) {
     int n = args.size();
     int streams_idx = -1;
     for (int i = 0; i < n; i++) {
-        if (args[i] == "STREAMS") {
+        if (args[i] == "streams") {
             streams_idx = i;
             break;
         }
@@ -222,8 +222,6 @@ void handle_client_xread(int client_fd, vector<string> args) {
             final_res.push_back({key, entries});
         }
     }
-
-    // If nothing found → return null (Redis behavior)
     if (final_res.empty()) {
         string resp = "$-1\r\n";
         send(client_fd, resp.c_str(), resp.size(), 0);
