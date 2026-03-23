@@ -169,6 +169,103 @@ bool id_le(const string &a, const string &b) {
 }
 
 
+bool id_gt(const string &a, const string &b) {
+    auto [ams, aseq] = parse_id(a);
+    auto [bms, bseq] = parse_id(b);
+    if (ams != bms) return ams > bms;
+    return aseq > bseq;
+}
+
+void handle_client_xread(int client_fd, vector<string> args) {
+    int n = args.size();
+    int streams_idx = -1;
+    for (int i = 0; i < n; i++) {
+        if (args[i] == "STREAMS") {
+            streams_idx = i;
+            break;
+        }
+    }
+    if (streams_idx == -1) {
+        string err = "-ERR missing STREAMS\r\n";
+        send(client_fd, err.c_str(), err.size(), 0);
+        return;
+    }
+    int total = n - streams_idx - 1;
+    int k = total / 2; 
+    vector<string> keys, ids;
+
+    for (int i = 0; i < k; i++) {
+        keys.push_back(args[streams_idx + 1 + i]);
+    }
+    for (int i = 0; i < k; i++) {
+        ids.push_back(args[streams_idx + 1 + k + i]);
+    }
+
+    // result: for each stream → list of entries
+    vector<pair<string, vector<pair<string, map<string,string>>>>> final_res;
+
+    for (int i = 0; i < k; i++) {
+        string key = keys[i];
+        string last_id = ids[i];
+
+        if (!stream_list_store.count(key)) continue;
+
+        vector<pair<string, map<string,string>>> entries;
+
+        for (auto &p : stream_list_store[key]) {
+            if (id_gt(p.first, last_id)) {
+                entries.push_back(p);
+            }
+        }
+
+        if (!entries.empty()) {
+            final_res.push_back({key, entries});
+        }
+    }
+
+    // If nothing found → return null (Redis behavior)
+    if (final_res.empty()) {
+        string resp = "$-1\r\n";
+        send(client_fd, resp.c_str(), resp.size(), 0);
+        return;
+    }
+
+    // Build RESP
+    string response = "*" + to_string(final_res.size()) + "\r\n";
+
+    for (auto &stream : final_res) {
+        const string &key = stream.first;
+        const auto &entries = stream.second;
+
+        response += "*2\r\n";
+
+        // stream name
+        response += "$" + to_string(key.length()) + "\r\n" + key + "\r\n";
+
+        // entries
+        response += "*" + to_string(entries.size()) + "\r\n";
+
+        for (auto &p : entries) {
+            const string &id = p.first;
+            const auto &field_value = p.second;
+
+            response += "*2\r\n";
+
+            response += "$" + to_string(id.length()) + "\r\n" + id + "\r\n";
+
+            response += "*" + to_string(2 * field_value.size()) + "\r\n";
+
+            for (auto &fv : field_value) {
+                response += "$" + to_string(fv.first.length()) + "\r\n" + fv.first + "\r\n";
+                response += "$" + to_string(fv.second.length()) + "\r\n" + fv.second + "\r\n";
+            }
+        }
+    }
+
+    send(client_fd, response.c_str(), response.length(), 0);
+}
+
+
 void handle_client_xrange(int client_fd, vector<string> args) {
     string key = args[1];
     string id_start = args[2];
@@ -429,16 +526,7 @@ void handle_client(int client_fd){
         }else if(command == "XRANGE"){
           handle_client_xrange(client_fd , args);
         }else if(command == "XREAD"){
-            string arg1 = args[3];
-            int arg1_sec = stoi(arg1.substr(0,arg1.find("-")));
-            arg1_sec++;
-            string arg1_sec_str = to_string(arg1_sec);
-            string arg2 = "+";
-            args[3] = arg1_sec_str;
-            args.push_back(arg2);
-            // we need to remove the args[1] which is stream
-            args.erase(args.begin() + 1); 
-            handle_client_xrange(client_fd , args);
+            handle_client_xread(client_fd , args);
         }
     }
   }
